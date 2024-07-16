@@ -1,0 +1,12 @@
+---
+- hosts: manage_aio
+  become: yes
+  strategy: linear
+  roles:
+  - {role: manage_aio, tags: manage_aio}
+
+- hosts: bamboofw_agent
+  become: yes
+  strategy: linear
+  roles:
+  - {role: bamboofw_agent, tags: bamboofw_agent}
