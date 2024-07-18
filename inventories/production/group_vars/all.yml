@@ -108,5 +108,5 @@ refresh_token: change_me_now
 #-------------------------
 felix_log_file: /var/log/felix.log
 felix_log_level: Info
-felix_prometheus_port: 9091
+felix_prometheus_port: 9092
 felix_reporting_interval: 30
