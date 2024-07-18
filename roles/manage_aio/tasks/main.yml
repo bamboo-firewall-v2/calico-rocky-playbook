@@ -118,6 +118,7 @@
     paths: /opt/{{ role_name }}/bbfw/
     recurse: true
     patterns: '*.yaml'
+    patterns: '*.yaml,*.yml'
   register: rule_files
 
 - name: Create init.sh
