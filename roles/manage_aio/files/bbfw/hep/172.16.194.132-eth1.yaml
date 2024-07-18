@@ -4,7 +4,7 @@ kind: HostEndpoint
 metadata:
   name: 172.16.194.132
   labels:
-    role: management
+    role: app
     zone: white
     namespace: production
     project: example
