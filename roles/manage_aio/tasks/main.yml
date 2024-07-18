@@ -54,8 +54,6 @@
       - containerd.io
       - docker-compose-plugin
     state: present
-  ignore_errors: true
-  when: service_docker_status.rc != 0
 
 - name: Start Docker service
   ansible.builtin.service:
