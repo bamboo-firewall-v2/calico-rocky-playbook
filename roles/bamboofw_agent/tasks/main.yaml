@@ -1,95 +1,102 @@
 ---
 - name: Build hosts file
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     line: '{{ ansible_ssh_host }} {{ name }}'
     create: true
+    mode: '644'
   tags: update_hostname
 
-- name: Set hostname 
-  hostname:
-    name: "{{ name }}"
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: '{{ name }}'
 
 - name: Build hosts file for etcd
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     line: '{{ item }}'
-    create: yes
+    create: true
+    mode: '644'
   loop:
-  - "{{ manage_node }} etcd1"
-  - "{{ manage_node }} etcd2"
-  - "{{ manage_node }} etcd3"
+    - '{{ manage_node }} etcd1'
+    - '{{ manage_node }} etcd2'
+    - '{{ manage_node }} etcd3'
 
 - name: Update cache
-  apt:
+  ansible.builtin.dnf:
     update_cache: true
-    upgrade: true
 
-- name: "Install ipset"
-  apt: 
+- name: Install ipset
+  ansible.builtin.dnf:
     name: ipset
     state: present
-    update_cache: yes
 
 - name: Download bamboofw-agent
-  get_url:
+  ansible.builtin.get_url:
     url: https://github.com/bamboo-firewall/calico/releases/download/v0.0.1/calico-felix-amd64.tar.gz
     dest: /tmp/calico-felix-amd64.tar.gz
-    mode: '0644'
+    mode: '644'
 
 - name: Extract felix bin file
-  unarchive:
+  ansible.builtin.unarchive:
     src: /tmp/calico-felix-amd64.tar.gz
     dest: /usr/local/bin/
     owner: root
     group: root
-    mode: 0755
-    remote_src: True
+    mode: '755'
+    remote_src: true
 
-- name: "Create directory for calico configuration"
-  file:
+- name: Create directory for calico configuration
+  ansible.builtin.file:
     path: /etc/calico
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: '755'
 
-- name: "Create configuration file for calico"
-  template:
+- name: Create configuration file for calico
+  ansible.builtin.template:
     src: templates/felix.cfg.j2
     dest: /etc/calico/felix.cfg
     owner: root
     group: root
-    mode: 0600
+    mode: '600'
 
-- name: "Create directory for calico SSL configuration"
-  file:
+- name: Create directory for calico SSL configuration
+  ansible.builtin.file:
     path: /etc/calico/ssl
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: '755'
 
-- name: Copy ssl file 
-  copy:
-    content: "{{ item.file_var }}"
-    dest: "/etc/calico/ssl/{{ item.file_name }}"
+- name: Copy ssl file
+  ansible.builtin.copy:
+    content: '{{ item.file_var }}'
+    dest: /etc/calico/ssl/{{ item.file_name }}
   with_items:
-    - { file_var: "{{ ca_cert }}", file_name: ca.pem }
-    - { file_var: "{{ cert }}", file_name: etcd.pem }
-    - { file_var: "{{ key }}", file_name: etcd-key.pem }  
+    - {file_var: '{{ ca_cert }}', file_name: ca.pem}
+    - {file_var: '{{ cert }}', file_name: etcd.pem}
+    - {file_var: '{{ key }}', file_name: etcd-key.pem}
 
-- name: "Create a calico service"
-  template:
+- name: Create a calico service
+  ansible.builtin.template:
     src: templates/calico.service.j2
     dest: /lib/systemd/system/calico-felix.service
     owner: root
     group: root
-    mode: 0644
+    mode: '644'
 
-- name: "Reload calico service"
-  systemd:
+- name: Reload calico service
+  ansible.builtin.systemd:
     name: calico-felix
     state: restarted
     daemon_reload: true
     enabled: true
+
+- name: Configure NetworkManager to not control Calico
+  become: true
+  ansible.builtin.copy:
+    src: calico.conf
+    dest: /etc/NetworkManager/conf.d/calico.conf
+    mode: '644'

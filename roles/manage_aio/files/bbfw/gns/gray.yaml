@@ -1,3 +1,4 @@
+---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkSet
 metadata:
@@ -6,5 +7,4 @@ metadata:
     zone: gray
     name: gray
 spec:
-  nets:
-    - 192.168.56.5/32
+  nets: [172.16.194.130/32]

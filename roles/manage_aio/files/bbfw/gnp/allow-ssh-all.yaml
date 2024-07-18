@@ -1,0 +1,14 @@
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-ssh-to-all-host
+spec:
+  selector: all()
+  ingress:
+    - action: Allow
+      protocol: TCP
+      source:
+        nets: [0.0.0.0/0]
+      destination:
+        ports: [22]
